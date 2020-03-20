@@ -6,11 +6,13 @@ using System.Threading;
 using UnityEngine;
 public static class Nonogram
 {
-    public static void Solve(string rowLetters, string columnLetters)
+    private static string Solved = "";
+    public static string Solve(string rowLetters, string columnLetters)
     {
         var r = rowLetters.Split(' ').Select(row => row.Select(s => s - 'A' + 1).ToArray()).ToArray();
         var c = columnLetters.Split(' ').Select(column => column.Select(s => s - 'A' + 1).ToArray()).ToArray();
         Solve(r, c);
+        return Solved;
     }
 
     static void Solve(int[][] rowRuns, int[][] columnRuns)
@@ -21,8 +23,8 @@ public static class Nonogram
         Reduce(rows, columns);
         foreach (var list in rows)
         {
-            if (list.Count != 1) Console.WriteLine(Repeat('?', len).Spaced());
-            else Console.WriteLine(list[0].ToString().PadLeft(len, '0').Replace('1', '#').Replace('0', '.').Reverse().Spaced());
+            if (list.Count != 1) Solved += (Repeat('?', len).Spaced())+'\n';
+            else Solved += (list[0].ToString().PadLeft(len, '0').Replace('1', '#').Replace('0', '.').Reverse().Spaced())+'\n';
         }
     }
     static List<BitSet> Generate(int length, params int[] runs)
