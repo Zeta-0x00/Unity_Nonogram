@@ -183,5 +183,10 @@ public class READER
         }
         return sb.ToString();
     }
+    public int[] GetDims()
+    {
+        int[] g={x,y};
+        return g;
+    }
     #endregion
 }
