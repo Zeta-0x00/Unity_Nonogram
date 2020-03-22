@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Threading;
 using System.Diagnostics;
-
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEditor;
+using System.IO;
 public class tester : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -14,14 +17,24 @@ public class tester : MonoBehaviour
     private  GameObject Cube1;
     [SerializeField]
     private  GameObject Cube2;
+    [SerializeField]
+    private  GameObject Cube3;
     private List<GameObject> Matrix;
-    private String[] DataSet;
-    double contX = -7;
-    double contY = 0;
     private Vector3 Pos;
+    private string path;
+    private List<string> DataSet;
+    UnityEngine.Quaternion Angle;
     void Start()
     {
-        READER reader = new READER("C:/Users/Zeta/Documents/TestFile.txt");
+        path = System.IO.File.ReadAllText("Data.txt");
+        Vector3 Pos = new Vector3((float) -7, (float) 4, 0);
+        Angle = Camera.main.transform.rotation;
+        DataSet = Solved().ToList<string>();
+        CreateNonogram();
+    }
+    private string[] Solved()
+    {
+        READER reader = new READER(path);
         String[] Da = reader.GetData();
         int[] v = reader.GetDims();
         UnityEngine.Debug.Log("Dimentions: "+v[0]+" x "+v[1]);
@@ -32,58 +45,58 @@ public class tester : MonoBehaviour
         UnityEngine.Debug.Log("Tiempo de ejecución = "+watch.Elapsed);
         Matrix = new List<GameObject>();
         //UnityEngine.Debug.Log(result);
-        DataSet = result.Split('\n');
-        Vector3 Pos = new Vector3((float)contX, (float)contY, 0);
-        CreateNonogram();
+        return result.Split('\n');
     }
-    /*private async Task WaitOneSecondAsync()
+    public void GoMenu()
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        //Debug.Log("Finished waiting.");
-    }*/
-
-    // Update is called once per frame
-    void Update()
-    {
-      //  DestroyMatrix();
-        
-      //  CreateNonogram();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
-    /*IEnumerator Waiting()
-    {
-        yield return new waitForSeconds(1);
-    }*/
     private void CreateNonogram()
     {
-        var Angle = Camera.main.transform.rotation;
         Pos[0] = (float) -7;
         Pos[1] = (float) 4;
         Pos[2] = (float) 0;
-        for(int i = 0; i < DataSet.Length; i++)
+        for(int i = 0; i < this.DataSet.Count(); i++)
         {
-            foreach (var item in DataSet[i])
+            foreach (var item in this.DataSet[i])
             {
-                //Waiting();
                 if(item == '#')
                 {
-                    Matrix.Add(Instantiate(Cube2,Pos,Angle));
+                    this.Matrix.Add(Instantiate(Cube2,Pos,Angle));
                 }
                 if(item == '.')
                 {
-                    Matrix.Add(Instantiate(Cube1,Pos,Angle));
+                    this.Matrix.Add(Instantiate(Cube1,Pos,Angle));
+                }
+                if(item == '?')
+                {
+                    this.Matrix.Add(Instantiate(Cube3,Pos,Angle));
                 }
                 Pos[0] += (float)0.2001;
             }
             Pos[0] = (float)-7;
             Pos[1] -= (float)0.25;
-
         }
+        UnityEngine.Debug.Log(this.Matrix.Count);
     }
-    private void DestroyMatrix()
+    public void NewNonogram()
     {
+        this.path = EditorUtility.OpenFilePanel("Overwrite with txt", "", "txt");
+        DestroyMatrix();
+        DataSet = Solved().ToList<string>();
+        CreateNonogram();
+    }
+    public void DestroyMatrix()
+    {
+        UnityEngine.Debug.Log("DataSet = "+ DataSet.Count);
+        DataSet.Clear();
+        UnityEngine.Debug.Log("DataSet = "+ DataSet.Count);
         foreach(var z in this.Matrix)
         {
             Destroy(z);
         }
+        UnityEngine.Debug.Log("Matrix = "+this.Matrix.Count);
+        this.Matrix.Clear();
+        UnityEngine.Debug.Log("Matrix = "+this.Matrix.Count);
     }
 }
