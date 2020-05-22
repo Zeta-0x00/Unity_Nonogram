@@ -24,8 +24,10 @@ public class tester : MonoBehaviour
     private string path;
     private List<string> DataSet;
     UnityEngine.Quaternion Angle;
+    private int startPoint;
     void Start()
     {
+        startPoint = 0;
         path = System.IO.File.ReadAllText("Data.txt");
         Vector3 Pos = new Vector3((float) -7, (float) 4, 0);
         Angle = Camera.main.transform.rotation;
@@ -35,16 +37,31 @@ public class tester : MonoBehaviour
     private string[] Solved()
     {
         READER reader = new READER(path);
-        String[] Da = reader.GetData();
-        int[] v = reader.GetDims();
-        UnityEngine.Debug.Log("Dimentions: "+v[0]+" x "+v[1]);
+        List<List<String>> Da = reader.GetData();
+            string x = "";
+            for (int i = 0; i < Da[0].Count; i++)
+            {
+                x = x + Da[0][i];
+                if (i < Da[0].Count-1)
+                {
+                    x = x + ' ';
+                }
+            }
+            string y = "";
+            for (int i = 0; i < Da[1].Count; i++)
+            {
+                y = y + Da[1][i];
+                if (i < Da[1].Count - 1)
+                {
+                    y = y + ' ';
+                }
+            }
         Stopwatch watch = new Stopwatch();
         watch.Start();
-        string result = Nonogram.Solve(Da[0],Da[1]);
+        string result = Nonogram.Solve(x,y);
         watch.Stop();
         UnityEngine.Debug.Log("Tiempo de ejecución = "+watch.Elapsed);
         Matrix = new List<GameObject>();
-        //UnityEngine.Debug.Log(result);
         return result.Split('\n');
     }
     public void GoMenu()
@@ -56,7 +73,7 @@ public class tester : MonoBehaviour
         Pos[0] = (float) -7;
         Pos[1] = (float) 4;
         Pos[2] = (float) 0;
-        for(int i = 0; i < this.DataSet.Count(); i++)
+        for(int i = startPoint; i < this.DataSet.Count(); i++)
         {
             foreach (var item in this.DataSet[i])
             {
@@ -76,8 +93,10 @@ public class tester : MonoBehaviour
             }
             Pos[0] = (float)-7;
             Pos[1] -= (float)0.25;
+            startPoint = i;
         }
-        UnityEngine.Debug.Log(this.Matrix.Count);
+        UnityEngine.Debug.Log("Tamaño de nonogram "+this.Matrix.Count);
+        UnityEngine.Debug.Log("Tamaño de DATASET "+this.DataSet.Count);
     }
     public void NewNonogram()
     {
@@ -90,6 +109,7 @@ public class tester : MonoBehaviour
     {
         UnityEngine.Debug.Log("DataSet = "+ DataSet.Count);
         DataSet.Clear();
+        DataSet = new List<String>();
         UnityEngine.Debug.Log("DataSet = "+ DataSet.Count);
         foreach(var z in this.Matrix)
         {

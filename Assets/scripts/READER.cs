@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-
-public class READER
+class READER
 {
-  #region Properties
-    private string path;
-    private string[] text;
-    private int x, y;
+    #region Properties
     private Dictionary<int, String> Keys = new Dictionary<int, string>();
-    private List<List<int>> NX = new List<List<int>>();
-    private List<List<int>> NY = new List<List<int>>();
+    private string[] text;
+    private string path;
+    private int x, y;
+    private List<string> linesY = new List<string>();
+    private List<string> linesX = new List<string>();
     #endregion
 
     #region Methods
@@ -47,130 +46,83 @@ public class READER
         this.Keys.Add(26, "Z");
     }
 
-    public READER(string rute)
+    public READER(string texto)
     {
-        this.path = rute;
-        this.Refactor();
-        this.StartDictionary();
+        path = texto;
+        StartDictionary();
+        Refactor();
     }
-    public Dictionary<int, String> GetDic()
+
+    private void Refactor()
     {
-        return this.Keys;
-    }
-    public string GetPath()
-    {
-        return this.path;
-    }
-    public void SetPath(string newpath)
-    {
-        this.path = newpath;
-    }
-    public void Refactor()
-    {
-        this.text = System.IO.File.ReadAllText(path).Split('\n');
-        this.Asing();
+        text = System.IO.File.ReadAllText(path).Split('\n');
+        Asing();
     }
     private void Asing()
     {
-        bool flag = false;
-        foreach (var z in this.text[0])
+        int a = 0;
+        foreach (var v in text[0])
         {
-            if (char.IsDigit(z) && !flag)
+            if (v.Equals(','))
             {
-                this.x = (this.x * 10) + (int)(z - '0');
+                this.x = a;
+                a = 0;
             }
-            if (!char.IsDigit(z))
+            if (char.IsDigit(v))
             {
-                flag = true;
-            }
-            if (char.IsDigit(z) && flag)
-            {
-                this.y = (this.y * 10) + (int)(z - '0');
+                a = (a * 10) + (int)(v - '0');
             }
         }
-        this.Castter();
-    }
-    private void Castter()
-    {
-        int aux = 0;
-        for (int i = 2; i <= x + 1; i++)
+        this.y = a;
+        for (int i = 2; i <= this.x + 1; i++)
         {
-            List<int> m = new List<int>();
-
-            foreach (var z in this.text[i])
+            int acum = 0;
+            string line = "";
+            foreach (var z in text[i])
             {
+                if (z.Equals(','))
+                {
+                    line = line + this.Keys[acum];
+                    acum = 0;
+                }
                 if (char.IsDigit(z))
                 {
-                    aux = (aux * 10) + (int)(z - '0');
-                }
-                if (!aux.Equals(0))
-                {
-                    m.Add(aux);
-                    aux = 0;
+                    acum = (acum * 10) + (int)(z - '0');
                 }
             }
-            m.Add(aux);
-            aux = 0;
-            this.NX.Add(m);
+            line = line + this.Keys[acum];
+            acum = 0;
+            linesX.Add(line);
         }
-
-        for (int i = x + 3; i < this.text.Length; i++)
+        int c = x + 3;
+        while (c < text.Length)
         {
-            List<int> m = new List<int>();
-            foreach (var z in this.text[i])
+            int acum = 0;
+            string line = "";
+            foreach (var z in text[c])
             {
+                if (z.Equals(','))
+                {
+                    line = line + this.Keys[acum];
+                    acum = 0;
+                }
                 if (char.IsDigit(z))
                 {
-                    aux = (aux * 10) + (int)(z - '0');
-                }
-                if (!aux.Equals(0))
-                {
-                    m.Add(aux);
-                    aux = 0;
+                    acum = (acum * 10) + (int)(z - '0');
                 }
             }
-            m.Add(aux);
-            aux = 0;
-            this.NY.Add(m);
+            line = line + this.Keys[acum];
+            acum = 0;
+            linesY.Add(line);
+            c++;
         }
-
-
     }
-    public String[] GetData()
+    public List<List<string>> GetData()
     {
-        String axisX = "";
-        String axisY = "";
-        for(int z =0; z<this.NX.Count; z++)
-        {
-            foreach (int v in NX[z])
-            {
-                if (!v.Equals(0))
-                {
-                    axisX += this.Keys[v];
-                }
-            }
-            if(z < this.NX.Count-1)
-            {
-                axisX += " ";
-            }
-            
-        }
-        for(int z=0; z<this.NY.Count; z++)
-        {
-            foreach (int v in NY[z])
-            {
-                if (!v.Equals(0))
-                {
-                    axisY += this.Keys[v];
-                }
-            }
-            if (z < this.NY.Count - 1)
-            {
-                axisY += " ";
-            }
-        }
-        String[] k = { axisX, axisY };
-        return k;
+        List<List<string>> d = new List<List<string>>();
+        d.Add(linesX);
+        d.Add(linesY);
+        return d;
     }
     public string ToHex(String T)
     {
@@ -182,11 +134,6 @@ public class READER
             sb.Append(t.ToString("X2"));
         }
         return sb.ToString();
-    }
-    public int[] GetDims()
-    {
-        int[] g={x,y};
-        return g;
     }
     #endregion
 }

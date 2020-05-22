@@ -1,1 +1,1 @@
-C:/Users/Zeta/Documents/Dinosaurio.txt
+C:/Users/Zeta/Documents/GitHub/Unity_Nonogram/Datos Prueba/TestFile.txt
